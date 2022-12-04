@@ -3,7 +3,9 @@ package com.dodon.purupu;
 import static java.lang.String.format;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.graphics.drawable.Drawable;
 import android.graphics.pdf.PdfRenderer;
@@ -24,7 +26,6 @@ public class ChapterActivity extends AppCompatActivity {
     private ImageView pageView;
     int page_number = 0;
 
-    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,14 +40,16 @@ public class ChapterActivity extends AppCompatActivity {
 
         File file = new File(path);
         Log.d("A", String.valueOf(file.exists()));
-
-
+        Log.d("A", String.valueOf(file.canRead()));
+        Log.d("A", String.valueOf(file.canWrite()));
+        Log.d("A", String.valueOf(file.canExecute()));
 
         try {
+
             ParcelFileDescriptor parcel = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
             PdfRenderer renderer = new PdfRenderer(parcel);
             chapterViewer = new PdfChapterViewer(getBaseContext(), renderer);
-            pageView.setImageDrawable(chapterViewer.getPage(page_number));
+            pageView.setImageDrawable(chapterViewer.getFirst());
         } catch (IOException e) {
             e.printStackTrace(System.err);
         }

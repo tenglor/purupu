@@ -27,6 +27,16 @@ public class PdfChapterViewer implements ChapterViewer{
     }
 
     @Override
+    public Drawable getFirst() {
+        return getPage(0);
+    }
+
+    @Override
+    public Drawable getLast() {
+        return getPage(getPageCount() - 1);
+    }
+
+    @Override
     public int getPageCount() {
         return renderer.getPageCount();
     }

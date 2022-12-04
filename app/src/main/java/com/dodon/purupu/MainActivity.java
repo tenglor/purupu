@@ -13,13 +13,17 @@ import android.widget.Button;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import java.io.File;
+
 public class MainActivity extends Activity {
 
     Button button;
 
     private static String[] PERMISSIONS_STORAGE = {
+            //Manifest.permission.MANAGE_EXTERNAL_STORAGE,
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE
+
     };
     
     @Override
@@ -33,13 +37,8 @@ public class MainActivity extends Activity {
 
             @Override
             public void onClick(View view) {
-                int permission = ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.READ_EXTERNAL_STORAGE);
                 //if(permission == PackageManager.PERMISSION_DENIED){
-                if(true){
-                    ActivityCompat.requestPermissions(MainActivity.this, PERMISSIONS_STORAGE,
-                            1);
-                }
-                Log.d("A", "O");
+                ActivityCompat.requestPermissions(MainActivity.this, PERMISSIONS_STORAGE, 2);
 
                 Intent intent = new Intent()
                         .setType("application/pdf")
@@ -51,6 +50,7 @@ public class MainActivity extends Activity {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data){
+        Log.d("A", String.valueOf(resultCode));
         switch (requestCode){
             case 1:
                 Uri selectedfile = data.getData();
@@ -58,6 +58,12 @@ public class MainActivity extends Activity {
                 if(path.contains("document/raw:")){
                     path = path.replace("/document/raw:","");
                 }
+
+                File file = new File(path);
+                Log.d("A", String.valueOf(file.exists()));
+                Log.d("A", String.valueOf(file.canRead()));
+                Log.d("A", String.valueOf(file.canWrite()));
+                Log.d("A", String.valueOf(file.canExecute()));
                 Intent intent = new Intent(MainActivity.this, ChapterActivity.class);
                 Bundle bundle = new Bundle();
                 bundle.putString("path", path);
@@ -71,9 +77,13 @@ public class MainActivity extends Activity {
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[], int[] grantResults) {
+        Log.d("A", "Permission result");
         switch (requestCode) {
-            case 1: {
-
+            case 2: {
+                int size = Math.min(permissions.length, grantResults.length);
+                for(int i = 0; i < size; i++){
+                    Log.d("A", permissions[i] + ": " + String.valueOf(grantResults[i]));
+                }
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
