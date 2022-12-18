@@ -8,7 +8,9 @@ import androidx.core.app.ActivityCompat;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ScaleDrawable;
 import android.graphics.pdf.PdfRenderer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
@@ -36,23 +38,22 @@ public class ChapterActivity extends AppCompatActivity {
 
         String path = getIntent().getExtras().getString("path");
 
-        Log.d("A", path);
-
-        File file = new File(path);
-        Log.d("A", String.valueOf(file.exists()));
-        Log.d("A", String.valueOf(file.canRead()));
-        Log.d("A", String.valueOf(file.canWrite()));
-        Log.d("A", String.valueOf(file.canExecute()));
-
         try {
-
-            ParcelFileDescriptor parcel = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
+            ParcelFileDescriptor parcel = getContentResolver().openFileDescriptor(Uri.parse(path), "r");
             PdfRenderer renderer = new PdfRenderer(parcel);
             chapterViewer = new PdfChapterViewer(getBaseContext(), renderer);
-            pageView.setImageDrawable(chapterViewer.getFirst());
+            Drawable draw = chapterViewer.getFirst();
+            float scaleWidth = (float)pageView.getWidth()/draw.getMinimumWidth();
+            float scaleHeight = (float)pageView.getHeight()/draw.getMinimumHeight();
+            float scale = Math.min(scaleWidth, scaleHeight);
+            ScaleDrawable scaleDraw = new ScaleDrawable(draw, 0,
+                    Math.round(pageView.getWidth() * scale),
+                    Math.round(pageView.getHeight() * scale));
+            pageView.setImageDrawable(scaleDraw.getDrawable());
         } catch (IOException e) {
-            e.printStackTrace(System.err);
+            e.printStackTrace();
         }
+
     }
 
     private boolean onTouch(View view, MotionEvent motionEvent) {

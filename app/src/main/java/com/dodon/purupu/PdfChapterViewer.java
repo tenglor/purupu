@@ -11,6 +11,7 @@ public class PdfChapterViewer implements ChapterViewer{
 
     private PdfRenderer renderer;
     private Context context;
+    private Page currentPage;
 
     PdfChapterViewer(Context context, PdfRenderer renderer){
         this.renderer = renderer;
@@ -19,11 +20,12 @@ public class PdfChapterViewer implements ChapterViewer{
 
     @Override
     public Drawable getPage(int i) {
-        Page page = renderer.openPage(i);
-        Bitmap bitmap = Bitmap.createBitmap(page.getWidth(), page.getHeight(), Bitmap.Config.ARGB_8888);
-        page.render(bitmap, null, null, Page.RENDER_MODE_FOR_DISPLAY);
-        Drawable draw = new BitmapDrawable(context.getResources(), bitmap);
-        return draw;
+        if(currentPage != null) currentPage.close();
+        currentPage = renderer.openPage(i);
+        Bitmap bitmap = Bitmap.createBitmap(currentPage.getWidth(), currentPage.getHeight(), Bitmap.Config.ARGB_8888);
+        currentPage.render(bitmap, null, null, Page.RENDER_MODE_FOR_DISPLAY);
+        BitmapDrawable bitmapDrawable = new BitmapDrawable(context.getResources(), bitmap);
+        return bitmapDrawable;
     }
 
     @Override

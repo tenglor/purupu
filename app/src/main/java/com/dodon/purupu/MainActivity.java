@@ -4,8 +4,12 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.pdf.PdfRenderer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.FileUtils;
+import android.os.ParcelFileDescriptor;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -14,12 +18,16 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class MainActivity extends Activity {
 
     Button button;
+    private final static int PICKFILE_RESULT_CODE = 1;
 
-    private static String[] PERMISSIONS_STORAGE = {
+    private static final String[] PERMISSIONS_STORAGE = {
             //Manifest.permission.MANAGE_EXTERNAL_STORAGE,
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -43,7 +51,7 @@ public class MainActivity extends Activity {
                 Intent intent = new Intent()
                         .setType("application/pdf")
                         .setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(intent, 1);
+                startActivityForResult(intent, PICKFILE_RESULT_CODE);
             }
         });
     }
@@ -52,21 +60,12 @@ public class MainActivity extends Activity {
     public void onActivityResult(int requestCode, int resultCode, Intent data){
         Log.d("A", String.valueOf(resultCode));
         switch (requestCode){
-            case 1:
-                Uri selectedfile = data.getData();
-                String path = selectedfile.getPath();
-                if(path.contains("document/raw:")){
-                    path = path.replace("/document/raw:","");
-                }
+            case PICKFILE_RESULT_CODE:
+                Uri selectedFile = data.getData();
 
-                File file = new File(path);
-                Log.d("A", String.valueOf(file.exists()));
-                Log.d("A", String.valueOf(file.canRead()));
-                Log.d("A", String.valueOf(file.canWrite()));
-                Log.d("A", String.valueOf(file.canExecute()));
                 Intent intent = new Intent(MainActivity.this, ChapterActivity.class);
                 Bundle bundle = new Bundle();
-                bundle.putString("path", path);
+                bundle.putString("path", selectedFile.toString());
                 intent.putExtras(bundle);
                 startActivity(intent);
                 break;
@@ -92,7 +91,6 @@ public class MainActivity extends Activity {
                 } else {
                     Log.d("A", "OH NO!");
                 }
-                return;
             }
         }
     }
